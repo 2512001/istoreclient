@@ -5,21 +5,14 @@ import '../styles/ProductCard.css';
 import { addToCart } from '../redux/slices/cartSlice';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import { addCart } from '../Api/api';
 
 const ProductCard = ({ product }) => {
+  console.log(product);
+
+
   const [isWishlisted, setIsWishlisted] = useState(false);
   const dispatch = useDispatch();
-
-  const getImageUrl = (name) => {
-    const map = {
-      'iPhone 15 Pro Max': 'https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-7inch_GEO_EMEA?wid=700&hei=700&fmt=jpeg&qlt=90&.v=1693009283811',
-      'iPhone 15 Pro': 'https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-1inch_GEO_EMEA?wid=700&hei=700&fmt=jpeg&qlt=90&.v=1693009283811',
-      'iPhone 15 Plus': 'https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-15-plus-finish-select-202309-6-7inch_GEO_EMEA?wid=700&hei=700&fmt=jpeg&qlt=90&.v=1693009283811',
-      'iPhone 15': 'https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-15-finish-select-202309-6-1inch_GEO_EMEA?wid=700&hei=700&fmt=jpeg&qlt=90&.v=1693009283811',
-      'iPhone SE': 'https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-se-finish-select-202207-4-7inch_GEO_EMEA?wid=700&hei=700&fmt=jpeg&qlt=90&.v=1654026289843'
-    };
-    return map[name] || 'https://via.placeholder.com/300x300?text=No+Image';
-  };
 
   const calculateDiscount = (original, current) => {
     const percent = Math.round(((original - current) / original) * 100);
@@ -29,21 +22,29 @@ const ProductCard = ({ product }) => {
   const originalPrice = product.price + 5000; // example
   const discount = calculateDiscount(originalPrice, product.price);
 
-  const handleAddCart = (e) => {
-    e.preventDefault();
-    dispatch(addToCart(product));
-    toast.success(`${product.name} added to cart!`, {
-      className: 'custom-toast',
-    });
+  const handleAddCart = async (e) => {
+    try {
+      e.preventDefault();
+      await addCart(product._id);
+      dispatch(addToCart(product));
+      toast.success(`${product.name} added to cart!`, {
+        className: 'custom-toast',
+      });
+    } catch (error) {
+      console.log(error);
+
+      toast.error(error.message)
+    }
+
   }
 
 
   return (
-    <Link to={`/product/${product.id}`} className="product-link">
+    <Link to={`/product/${product._id}`} className="product-link">
       <div className="product-card">
         <div className="img-container">
-          <img src={getImageUrl(product.name)} alt={product.name} />
-          {product.stock < 10 && (
+          <img src={product.images[0]} alt={product.name} />
+          {product.stock < 5 && (
             <span className="stock-badge">Only {product.stock} left!</span>
           )}
         </div>
@@ -55,16 +56,17 @@ const ProductCard = ({ product }) => {
             <span className="original">₹{originalPrice.toLocaleString()}</span>
             <span className="discount">({discount}% OFF)</span>
           </div>
+          
           <div className="stars">
-            {[...Array(5)].map((_, i) => (
-              <FaStar key={i} className={`star ${i < product.rating ? 'filled' : ''}`} />
-            ))}
+            <FaStar color='white' className="star-icon" />
+            <span>{product.averageRating > 0 ? product.averageRating : 5 }</span>
           </div>
 
           <div className="actions">
             <button onClick={(e) => {
               e.preventDefault();
               setIsWishlisted(!isWishlisted);
+              toast.warning('This feature will be introduced soon!');
             }} className={`wishlist ${isWishlisted ? 'active' : ''}`}>
               <FaHeart /> {isWishlisted ? 'Wishlisted' : 'Wishlist'}
             </button>

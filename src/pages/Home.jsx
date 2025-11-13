@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import '../styles/Home.css';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
   const getImageUrl = (id) => {
@@ -25,13 +26,17 @@ const Home = () => {
         >
           <h1>Buy Your Dream iPhone Today</h1>
           <p>Experience the latest technology with our premium selection of iPhones</p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="cta-button"
-          >
-            Shop Now
-          </motion.button>
+          <Link to='/products' style={{ textDecoration: 'none', color: "white" }}>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="cta-button"
+            >
+
+              Shop Now
+            </motion.button>
+          </Link>
+
         </motion.div>
       </section>
 

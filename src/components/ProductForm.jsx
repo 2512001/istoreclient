@@ -31,6 +31,7 @@ const ProductForm = () => {
   };
 
   const handleSubmit = async (e) => {
+    console.log('form submit triggered');
     e.preventDefault();
     const data = new FormData();
 
@@ -48,12 +49,14 @@ const ProductForm = () => {
     if (video) {
       data.append('video', video);
     }
+    console.log(data);
 
     try {
       const res = await axios.post('http://localhost:3000/api/products', data, {
         headers: { 'Content-Type': 'multipart/form-data' },
         withCredentials: true,
       });
+      console.log(res);
 
       if (res.data.success) {
         setMessage('✅ Product uploaded successfully!');

@@ -1,191 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState, } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import { toast } from 'react-toastify';
 import '../styles/Products.css';
+import { useQuery } from '@tanstack/react-query';
+import { getpageCount, getProducts } from '../Api/api';
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
+
+function Query() {
+  return new URLSearchParams(useLocation().search);
+}
 
 const Products = () => {
+  const query = Query();
+  const search = query.get('search');
   const [filter, setFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('featured');
+  const [sortBy, setSortBy] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  // Simulated API call to fetch products
-  const fetchProducts = async (searchQuery) => {
-    setLoading(true);
-    try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // This is where you'd normally make an API call
-      // For now, we'll filter the dummy data based on the search query
-      const searchLower = searchQuery.toLowerCase();
-      const matchedProducts = dummyProducts.filter(product => {
-        const nameLower = product.name.toLowerCase();
-        const descLower = product.description.toLowerCase();
-        const priceLower = product.price.toString();
-
-        // Match by name, description, price, or any relevant term
-        return nameLower.includes(searchLower) || 
-               descLower.includes(searchLower) || 
-               priceLower.includes(searchLower) ||
-               // Match specific terms like 'pro', 'max', etc.
-               (searchLower === 'pro' && nameLower.includes('pro')) ||
-               (searchLower === 'max' && nameLower.includes('max')) ||
-               // Match price ranges
-               (searchLower.includes('under') && product.price < 100000) ||
-               (searchLower.includes('above') && product.price > 100000);
-      });
-
-      setProducts(matchedProducts);
-      if (matchedProducts.length === 0) {
-        toast.info(`No products found for "${searchQuery}"`);
-      }
-    } catch (error) {
-      toast.error('Error fetching products');
-      console.error('Error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const search = params.get('search');
-    if (search) {
-      const decodedSearch = decodeURIComponent(search);
-      setSearchTerm(decodedSearch);
-      fetchProducts(decodedSearch);
-      
-      // Set filter if search contains 'pro'
-      if (decodedSearch.toLowerCase().includes('pro')) {
-        setFilter('pro');
-      }
-    } else {
-      // Load all products when no search is specified
-      setProducts(dummyProducts);
-    }
-  }, [location.search]);
+    setCurrentPage(1);
+  }, [search]);
 
-  // Dummy products data (this would normally come from your API)
-  const dummyProducts = [
-    {
-      id: 1,
-      name: 'iPhone 15 Pro Max',
-      price: 1099,
-      storage: '256GB',
-      color: 'Natural Titanium',
-      description: 'The most powerful iPhone ever with A17 Pro chip.'
-    },
-    {
-      id: 2,
-      name: 'iPhone 15 Pro',
-      price: 999,
-      storage: '256GB',
-      color: 'Natural Titanium',
-      description: 'Pro camera system and A17 Pro chip.'
-    },
-    {
-      id: 3,
-      name: 'iPhone 15 Plus',
-      price: 899,
-      storage: '256GB',
-      color: 'Black',
-      description: 'Large display and powerful performance.'
-    },
-    {
-      id: 4,
-      name: 'iPhone 15',
-      price: 799,
-      storage: '256GB',
-      color: 'Black',
-      description: 'Advanced camera system and A16 Bionic chip.'
-    },
-    {
-      id: 5,
-      name: 'iPhone 14 Pro Max',
-      price: 999,
-      storage: '256GB',
-      color: 'Deep Purple',
-      description: 'Dynamic Island and 48MP camera.'
-    },
-    {
-      id: 6,
-      name: 'iPhone 14 Pro',
-      price: 899,
-      storage: '256GB',
-      color: 'Deep Purple',
-      description: 'Pro camera system and A16 Bionic chip.'
-    },
-    {
-      id: 7,
-      name: 'iPhone 14 Plus',
-      price: 799,
-      storage: '256GB',
-      color: 'Midnight',
-      description: 'Large display and powerful performance.'
-    },
-    {
-      id: 8,
-      name: 'iPhone 14',
-      price: 699,
-      storage: '256GB',
-      color: 'Midnight',
-      description: 'Advanced camera system and A15 Bionic chip.'
-    }
-  ];
 
-  const getFilteredProducts = () => {
-    let filtered = [...products];
 
-    // Apply search filter
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(product => {
-        const nameLower = product.name.toLowerCase();
-        const descLower = product.description.toLowerCase();
-        
-        // Check if search term matches the model number (e.g., '14' matches 'iPhone 14')
-        const modelMatch = searchLower.match(/\d+/);
-        if (modelMatch) {
-          const searchModel = modelMatch[0];
-          const productModel = nameLower.match(/\d+/)?.[0];
-          if (productModel === searchModel) return true;
-        }
-
-        return nameLower.includes(searchLower) || 
-               descLower.includes(searchLower);
-      });
-    }
-
-    // Apply category filter
-    if (filter !== 'all') {
-      filtered = filtered.filter(product => {
-        if (filter === 'pro') return product.name.includes('Pro');
-        if (filter === 'regular') return !product.name.includes('Pro');
-        return true;
-      });
-    }
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'price-low':
-          return a.price - b.price;
-        case 'price-high':
-          return b.price - a.price;
-        default: // featured
-          return 0;
-      }
-    });
-
-    return filtered;
-  };
-
-  const filteredProducts = getFilteredProducts();
+  const { data: { pageCount = 0, products = [] } = {}, isLoading: isProductloading } = useQuery({
+    queryKey: ['products', search || '', sortBy, currentPage],
+    queryFn: () => getProducts({ search, sortBy, page: currentPage }),
+    keepPreviousData: true,
+  });
+  
 
   return (
     <div className="products-page">
@@ -221,30 +66,40 @@ const Products = () => {
         </div>
       </div>
 
-      <div className="products-header">
-        {searchTerm && (
-          <div className="search-info">
-            <p>Showing results for "{searchTerm}"</p>
-            <button 
-              className="clear-search" 
-              onClick={() => {
-                setSearchTerm('');
-                navigate('/products');
-              }}
-            >
-              Clear Search
-            </button>
-          </div>
-        )}
-      </div>
 
       <div className="products-grid">
-        {loading ? (
-          <div className="loading">
-            <p>Loading products...</p>
-          </div>
-        ) : filteredProducts.length > 0 ? (
-          filteredProducts.map(product => (
+        {isProductloading ? (
+          // Render 6 skeleton cards to simulate loading state
+          [...Array(6)].map((_, i) => (
+            <div className="product-card" key={i}>
+              <div className="img-container">
+                <Skeleton height={180} width="100%" />
+              </div>
+
+              <div className="info">
+                <h2><Skeleton width="80%" /></h2>
+
+                <div className="price-wrapper">
+                  <Skeleton width="40%" />
+                  <Skeleton width="30%" />
+                  <Skeleton width="20%" />
+                </div>
+
+                <div className="stars">
+                  {[...Array(5)].map((_, i) => (
+                    <Skeleton key={i} circle width={20} height={20} style={{ marginRight: 5 }} />
+                  ))}
+                </div>
+
+                <div className="actions">
+                  <Skeleton height={30} width="45%" style={{ marginRight: 10 }} />
+                  <Skeleton height={30} width="45%" />
+                </div>
+              </div>
+            </div>
+          ))
+        ) : products.length > 0 ? (
+          products.map(product => (
             <ProductCard key={product.id} product={product} />
           ))
         ) : (
@@ -253,9 +108,44 @@ const Products = () => {
           </div>
         )}
       </div>
+
+      <div className="pagination">
+        <button className="pagination-btn"
+          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+          disabled={currentPage === 1}
+          style={{
+            cursor: currentPage === 1 ? "not-allowed" : "pointer",
+            opacity: currentPage === 1 ? 0.5 : 1,
+          }}
+        >−</button>
+
+        <div className="pagination-input">
+          <input
+            type="number"
+            min="1"
+            defaultValue={1}
+            value={currentPage}
+          />
+          <span className="total-pages">/ {pageCount}</span>
+        </div>
+
+        <button className="pagination-btn"
+          onClick={() => setCurrentPage(prev => {
+            if (prev < pageCount) {
+              return prev + 1;
+            }
+            return prev;
+          })}
+          disabled={currentPage === pageCount}
+          style={{
+            cursor: currentPage === pageCount ? "not-allowed" : "pointer",
+            opacity: currentPage === pageCount ? 0.5 : 1,
+          }}
+        >+</button>
+      </div>
+
     </div>
   );
 };
 
 export default Products;
-    

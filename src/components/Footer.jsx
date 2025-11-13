@@ -1,6 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaInstagram, FaLinkedin, FaFacebook } from "react-icons/fa";
+import { FaSquareXTwitter } from "react-icons/fa6";
 import '../styles/Footer.css';
+import { toast } from 'react-toastify';
 const Footer = () => {
   return (
     <footer className="footer">
@@ -11,16 +14,16 @@ const Footer = () => {
             <p>Your premium destination for Apple products</p>
             <div className="social-links">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-                <i className="fab fa-facebook-f"></i>
+                <FaFacebook fontSize={'20px'} />
               </a>
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-                <i className="fab fa-twitter"></i>
+                <FaSquareXTwitter fontSize={'20px'} />
               </a>
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                <i className="fab fa-instagram"></i>
+                <FaInstagram fontSize={'20px'} />
               </a>
               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                <i className="fab fa-linkedin-in"></i>
+                <FaLinkedin fontSize={'20px'} />
               </a>
             </div>
           </div>
@@ -65,7 +68,7 @@ const Footer = () => {
             <p>Subscribe to our newsletter for the latest updates and offers</p>
             <div className="newsletter-form">
               <input type="email" placeholder="Enter your email" />
-              <button type="submit">Subscribe</button>
+              <button type="submit" onClick={() =>toast.info('Coming soon 🚀')}>Subscribe</button>
             </div>
           </div>
         </div>
@@ -83,7 +86,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
+    </footer >
   );
 };
 

@@ -88,7 +88,6 @@
     border: none;
     border-radius: 6px;
     flex: 1;
-    min-width: 200px;
     font-size: 14px;
   }
   
@@ -101,6 +100,7 @@
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    width: 100%;
   }
   
   .newsletter-form button:hover {
@@ -151,11 +151,7 @@
       flex-direction: column;
       align-items: stretch;
     }
-  
-    .newsletter-form input[type="email"],
-    .newsletter-form button {
-      width: 100%;
-    }
+
   
     .footer-bottom-content {
       align-items: center;

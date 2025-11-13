@@ -1,4 +1,4 @@
-/* Navbar Wrapper */
+/* Navbar */
 .navbar {
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
@@ -14,11 +14,11 @@
 
 .navbar-scrolled {
   height: 70px;
-  background-color: #ffffff;
+  background-color: #fff;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
 }
 
-/* Navbar Inner Container */
+/* Container */
 .navbar-container {
   max-width: 1280px;
   margin: auto;
@@ -27,14 +27,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
 }
 
 /* Logo */
-.logo {
-  font-size: 1.8rem;
+.home-icon {  
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
   text-decoration: none;
-  color: #222; /* Softer black */
+  color: #222;
   font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -42,7 +46,7 @@
   font-size: 1.6rem;
 }
 
-/* Navigation Links */
+/* Nav Links */
 .nav-links {
   display: flex;
   gap: 2rem;
@@ -56,7 +60,6 @@
   font-weight: 500;
   font-size: 1rem;
   position: relative;
-  transition: color 0.3s ease;
 }
 
 .nav-links a::after {
@@ -78,36 +81,24 @@
   width: 100%;
 }
 
-/* Right Section (Search + Cart) */
+/* Right Section */
 .right-section {
   display: flex;
   align-items: center;
   gap: 1.5rem;
 }
 
-/* Search Bar */
+/* Search */
 .search-container {
   display: flex;
   align-items: center;
-  margin-right: 20px;
+  justify-content: center;
   position: relative;
   background: #f8f9fa;
   border-radius: 24px;
   padding: 6px 16px;
   border: 2px solid transparent;
   transition: all 0.3s ease;
-}
-
-.search-results-container {
-  position: absolute;
-  top: 70px;
-  left: 0;
-  right: 0;
-  background: #fff;
-  z-index: 100;
-  min-height: 200px;
-  border-top: 1px solid #eee;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .search-container input {
@@ -123,7 +114,6 @@
 
 .search-container input::placeholder {
   color: #666;
-  opacity: 0.8;
 }
 
 .search-container:focus-within {
@@ -134,38 +124,24 @@
 
 .search-icon {
   font-size: 16px;
-}
-
-.search-button {
-  background: none;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
   color: #666;
 }
 
-.search-button:hover {
-  color: #2563eb;
-}
-
-/* Cart Link */
+/* Cart */
 .cart-container {
+  position: relative;
   display: flex;
   align-items: center;
 }
 
 .cart-link {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
   color: #333;
   font-size: 1.05rem;
   font-weight: 500;
-  transition: color 0.3s ease;
   text-decoration: none;
 }
 
@@ -178,31 +154,23 @@
 }
 
 .cart-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
   position: absolute;
-  top: -8px;
-  right: -10px;
+  top: -12px;
+  right: -18px;
   background-color: #0071e3;
   color: white;
-  font-size: 0.7rem;
+  font-size: 9px;
   font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 999px;
+  border-radius: 50%;
+  z-index: 10;
 }
 
-.cart-count {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background-color: #0071e3;
-  color: white;
-  font-size: 0.7rem;
-  font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 999px;
-  z-index: 1;
-}
-
-/* Hamburger Button */
+/* Hamburger Menu */
 .menu-toggle {
   display: none;
   flex-direction: column;
@@ -216,21 +184,22 @@
   width: 24px;
   height: 2px;
   background-color: #333;
-  transition: all 0.3s ease-in-out;
 }
 
-/* Mobile Responsive */
+.profile-link{
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .menu-toggle {
     display: flex;
   }
-
-  .search-container {
+  .home-icon .link-text{
     display: none;
-  }
-
-  .right-section {
-    gap: 1rem;
   }
 
   .nav-links {
@@ -249,6 +218,7 @@
 
   .nav-links.active {
     transform: translateY(0);
+    margin-top: 1rem;
   }
 
   .nav-links a {
@@ -262,7 +232,46 @@
   .nav-links a:hover {
     background-color: #f5f5f5;
   }
+
+  .search-container {
+    width: 80%;
+    padding: 0.5rem 1rem;
+      margin: auto; /* Aligns to right in flex container */
+  }
+
+  .search-container input {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+
+  .right-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    margin-top: 1rem;
+    width: 100%;
+  }
+   
+  .cart-nav{
+    width: 100%;
+  }
+  .cart-nav .cart-link{
+    width: 100%;
+    display: flex;  
+    justify-content: center;
+    }
+
+
+    .cart-count{
+       right: 410px;
+       top : 8px;
+       font-size: 14px;
+       padding: 0.3rem;
+    }
 }
+
 
 @media (max-width: 480px) {
   .navbar-container {
@@ -276,50 +285,6 @@
   .cart-link {
     font-size: 1.1rem;
   }
-}
 
-
-/* Badge Above Cart Icon */
-.cart-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.cart-link {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #333;
-  font-size: 1.05rem;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.cart-link:hover {
-  color: #0071e3;
-}
-
-.cart-icon {
-  font-size: 1.1rem;
-}
-
-/* 🔵 Cart Count Badge */
-.cart-count {
-  position: absolute;
-  top: -12px;
-  right: -18px;
-  background-color: #0071e3;
-  color: white;
-  font-size: 0.7rem;
-  font-weight: bold;
-  padding: 2px 4px;
-  border-radius: 50%;
-  z-index: 10;
-  min-width: 15px;
-  height: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  
 }

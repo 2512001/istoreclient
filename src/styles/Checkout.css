@@ -54,7 +54,9 @@
   margin-bottom: 0.4rem;
   font-weight: 500;
   font-size: 0.95rem;
+  color: #000;
 }
+
 
 .form-group input,
 .form-group select {
@@ -62,18 +64,17 @@
   border: 1px solid #ccc;
   border-radius: 0.5rem;
   font-size: 1rem;
-  background: #fafafa;
   transition: border 0.3s ease;
   width: 100%;
   box-sizing: border-box;
+  color: #181818;
 }
 
 .form-group input:focus,
 .form-group select:focus {
   border-color: #000;
   outline: none;
-  background: #fff;
-}
+} 
 
 .payment-methods {
   display: flex;

@@ -1,24 +1,83 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/Checkout.css';
 import { FaCreditCard, FaPaypal } from 'react-icons/fa';
+import { BsCash, BsBank2 } from "react-icons/bs";
+import { SiRazorpay, SiPaytm } from "react-icons/si";
+import { FaGooglePay } from "react-icons/fa6";
 import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { useFormik } from 'formik';
+import { checkoutSchema } from '../utils/validation';
+import { clearCart } from '../redux/slices/cartSlice';
+
+const intialValue = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  street: '',
+  city: '',
+  state: '',
+  zipCode: '',
+  country: '',
+  paymentMethod: ''
+};
 
 const Checkout = () => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    street: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: '',
-    paymentMethod: ''
+  const navigate = useNavigate();
+  const dispatch = useDispatch()
+
+
+  const cartItems = useSelector((state) => state.cart.items);
+
+
+  const { values, handleSubmit, handleChange, handleBlur, touched, errors, setFieldValue } = useFormik({
+    initialValues: intialValue,
+    validationSchema: checkoutSchema,
+    onSubmit: async (values) => {
+      if (!values.paymentMethod) {
+        toast.error("Please select a payment method");
+        return;
+      }
+      try {
+        // Send the cart items and shipping address to create the order
+        const payload = {
+          items: cartItems.map((item) => ({
+            product: item.productId._id,
+            quantity: item.quantity
+          })),
+          shippingAddress: {
+            street: values.address,
+            city: values.city,
+            state: values.state,
+            zipCode: values.zipCode,
+            country: values.country,
+          },
+          paymentMethod: values.paymentMethod
+        };
+        // Call the backend to create the Razorpay order
+        const { data } = await axios.post("http://localhost:3000/api/orders", payload, { withCredentials: true });
+
+
+        if (!data.success) return toast('order not created');
+        if (data.paymentMethod === 'cod') {
+          dispatch(clearCart());
+          toast.success('order created successfully');
+          return navigate('/order-success');
+        }
+        //  Trigger Razorpay payment gateway
+        openRazorpayPayment(data);
+      } catch (err) {
+        console.log('error triggered');
+        console.log(err);
+        alert("Order failed");
+      }
+    }
   });
 
-  const [cartItems] = useState([
-    { id: "67fd0542e830f92bc2abc4a4", name: 'iphone 15 pro max', price : 120000 ,  quantity: 1 },
-  ]);
+
+
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -28,50 +87,11 @@ const Checkout = () => {
   }, []);
 
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log('submit form');
-    
-    try {
-      // Send the cart items and shipping address to create the order
-      const payload = {
-        items: cartItems.map((item) => ({
-          product: item.id,
-          quantity: item.quantity
-        })),
-        shippingAddress: {
-          street: formData.address,
-          city: formData.city,
-          state: formData.state,
-          zipCode: formData.zipCode,
-          country: formData.country,
-        },
-      };
-
-      // Call the backend to create the Razorpay order
-      const { data } = await axios.post("http://localhost:3000/api/orders", payload);
-      if (!data.success) return alert("Order creation failed.");
-
-      // Trigger Razorpay payment gateway
-      openRazorpayPayment(data);
-    } catch (err) {
-      console.log('error triggered');
-      console.log(err);
-      alert("Order failed");
-    }
-  };
 
   const openRazorpayPayment = (orderData) => {
     const options = {
-      key: "rzp_test_Fz6DFx8JtwyJ66", // Replace with your Razorpay key
+      key: "rzp_test_bIeysiWYbzTB64", // Replace with your Razorpay key
       amount: orderData.amount,
       currency: "INR",
       name: "My Store",
@@ -84,10 +104,13 @@ const Checkout = () => {
           const verifyRes = await axios.post("http://localhost:3000/api/orders/payment/verify", {
             ...response,
             order_id: orderData.orderId,
+          }, {
+            withCredentials: true
           });
-
+          //verify payment 
           if (verifyRes.data.success) {
-            alert("🎉 Payment successful");
+            dispatch(clearCart())
+            navigate('/payment-success', { state: { paymentSuccess: true } })
           } else {
             alert("❌ Payment failed");
           }
@@ -98,8 +121,8 @@ const Checkout = () => {
       },
 
       prefill: {
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.email,
+        name: `${values.firstName} ${values.lastName}`,
+        email: values.email,
       },
       theme: {
         color: "#3399cc",
@@ -112,14 +135,14 @@ const Checkout = () => {
 
 
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+    return cartItems.reduce((total, item) => total + item.productId.price * item.quantity, 0);
   };
 
   return (
     <div className="checkout-page">
       <h1>Checkout</h1>
       <div className="checkout-container">
-        <form className="checkout-form">
+        <form className="checkout-form" onSubmit={handleSubmit}>
           <h2>Shipping Information</h2>
           <div className="form-grid">
             {[
@@ -137,10 +160,14 @@ const Checkout = () => {
                   type={type}
                   id={name}
                   name={name}
-                  value={formData[name]}
+                  value={values[name]}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
                 />
+                {touched[name] && errors[name] && (
+                  <span className='errors'>{errors[name]}</span>
+                )}
               </div>
             ))}
 
@@ -149,13 +176,15 @@ const Checkout = () => {
               <select
                 id="country"
                 name="country"
-                value={formData.country}
+                value={values.country}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 required
               >
                 <option value="">Select Country</option>
-                <option value="US">United States</option>
-                <option value="CA">Canada</option>
+                <option value="INDIA">India</option>
+                <option value="USA">United States</option>
+                <option value="CANADA">Canada</option>
                 <option value="UK">United Kingdom</option>
               </select>
             </div>
@@ -164,18 +193,22 @@ const Checkout = () => {
           <h2>Payment Method</h2>
           <div className="payment-methods">
             <div
-              className={`payment-method ${formData.paymentMethod === 'credit' ? 'selected' : ''}`}
-              onClick={() => setFormData({ ...formData, paymentMethod: 'credit' })}
+              className={`payment-method ${values.paymentMethod === 'cod' ? 'selected' : ''}`}
+              onClick={() => setFieldValue('paymentMethod', 'cod')}
             >
-              <FaCreditCard />
-              <span>Credit Card</span>
+              <BsCash />
+              <span> Cash on Delivery</span>
             </div>
             <div
-              className={`payment-method ${formData.paymentMethod === 'paypal' ? 'selected' : ''}`}
-              onClick={() => setFormData({ ...formData, paymentMethod: 'paypal' })}
+              className={`payment-method ${values.paymentMethod === 'Razorpay' ? 'selected' : ''}`}
+              onClick={() => setFieldValue('paymentMethod', 'Razorpay')}
             >
-              <FaPaypal />
-              <span>PayPal</span>
+              <FaCreditCard />
+              <SiRazorpay />
+              <FaGooglePay style={{ fontSize: '25px' }} />
+              <SiPaytm style={{ fontSize: '25px' }} />
+              <BsBank2 />
+              <span>Razor pay</span>
             </div>
           </div>
         </form>
@@ -184,9 +217,9 @@ const Checkout = () => {
           <h2>Order Summary</h2>
           <div className="order-items">
             {cartItems.map((item) => (
-              <div key={item.id} className="order-item">
-                <span>{item.name}</span>
-                <span>${item.price * item.quantity}</span>
+              <div key={item.productId._id} className="order-item">
+                <span>{item.productId.name}</span>
+                <span>${item.productId.price * item.quantity}</span>
               </div>
             ))}
           </div>
@@ -194,9 +227,9 @@ const Checkout = () => {
             <span>Total</span>
             <span>${calculateTotal()}</span>
           </div>
-          <button type="submit" className="place-order-button" onClick={(e)=>{ handleSubmit(e)}}>
+          <button type="submit" className="place-order-button" onClick={(e) => { handleSubmit(e) }}>
             Place Order
-          </button> 
+          </button>
         </div>
       </div>
     </div>

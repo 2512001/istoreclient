@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/Contact.css';
+import { contactUs } from '../Api/api';
+
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -19,8 +21,13 @@ const Contact = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
+    contactUs(formData);
+    setFormData({
+      name: '',
+      email: '',
+      subject: '',
+      message: ''
+    });
   };
 
   return (
