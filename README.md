@@ -26,7 +26,7 @@ This README is beginner-friendly — follow it step-by-step to run the app local
 
 ### 1) Clone repo
 ```bash
-git clone https://github.com/yourusername/iphone-store-client.git
+git clone https://github.com/2512001/istoreclient.git
 cd iphone-store-client
 2) Install dependencies
 bash
